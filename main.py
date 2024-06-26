@@ -62,7 +62,7 @@ class Sudoku:
 
     return possVals
 
-  def simpSolve(self):
+  def logicFill(self):
       change = 1
       while change != 0:
         change = 0
@@ -78,7 +78,8 @@ class Sudoku:
               elif len(L) == 0:
                 self.board[j][i] = '!'
 
-      return self.board
+
+
 
   def checkSolve(self):
     for j in range(9):
@@ -88,32 +89,60 @@ class Sudoku:
     return True
 
   def findPlus(self):
-    L = []
+    for i in range(9):
+      for j in range(9):
+        if self.board[i][j] == '+':
+          return [i, j], self.poss(j,i)
+    return False
+
+  def findError(self):
     for j in range(9):
       for i in range(len(self.board[j])):
-        if self.board[j][i] == '+':
-          L.append([i,j])
-    return L[0]
+        if self.board[j][i] == '!':
+          return True
+    return False
   
   def actSolve(self):
-    self.simpSolve()
-    while not self.checkSolve():
-      testBoard = self.board
-      spot = testBoard.findPlus()
-      L = self.poss(spot[0],spot[1])
+    backup = self.board
+    testBoard = self
+    print("self", self)
+    testBoard.logicFill()
+    if testBoard.checkSolve():
+      return
+    elif testBoard.findError():
+      print("found error")
+      return 
+    else:
+      self.board = backup
+      spot, poss = self.findPlus()
+      for i in poss:
+        testBoard.board = backup
+        print("loop", testBoard)
+        print("guess", spot, i)
+        testBoard.board[spot[0]][spot[1]] = i
+        print("testboard pre-solve", testBoard)
+        extra = testBoard
+        extra.actSolve()
+        print("testboard post-solve", extra)
+        if not extra.findError():
+          self.board = extra.board
+          return
+          
+        
       
       
       
     
 
-      
-
 def main():
-  testBoard = Sudoku(testBoardMedium)
-  testBoard.simpSolve()
-  print(testBoard)
-  print(testBoard.checkSolve())
-  print(testBoard.findPlus())
+  testBoard1 = Sudoku(testBoardMedium)
+  testBoard1.logicFill()
+  print(testBoard1)
+  testBoard2 = Sudoku(testBoardMedium)
+  testBoard2.actSolve()
+  print("final", testBoard2)
+  print(testBoard2.checkSolve())
+  print(testBoard2.findPlus())
 
 if __name__ == '__main__':
   main()
