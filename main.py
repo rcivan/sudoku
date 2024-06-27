@@ -1,4 +1,5 @@
 from testBoard import *
+import copy
 
 class Sudoku:
   def __init__(self, boardText=None):
@@ -103,46 +104,37 @@ class Sudoku:
     return False
   
   def actSolve(self):
-    backup = self.board
-    testBoard = self
-    print("self", self)
-    testBoard.logicFill()
-    if testBoard.checkSolve():
+    self.logicFill()
+    if self.checkSolve():
       return
-    elif testBoard.findError():
-      print("found error")
+    elif self.findError():
       return 
     else:
-      self.board = backup
+      testBoard1 = copy.deepcopy(self)
+      testBoard2 = copy.deepcopy(self)
       spot, poss = self.findPlus()
+      L = []
       for i in poss:
-        testBoard.board = backup
-        print("loop", testBoard)
-        print("guess", spot, i)
-        testBoard.board[spot[0]][spot[1]] = i
-        print("testboard pre-solve", testBoard)
-        extra = testBoard
-        extra.actSolve()
-        print("testboard post-solve", extra)
-        if not extra.findError():
-          self.board = extra.board
+        L.append(i)
+      testBoard1.board[spot[0]][spot[1]] = L[0]
+      testBoard1Check = copy.deepcopy(testBoard1)
+      testBoard1Check.actSolve()
+      if not testBoard1Check.findError():
+          self.board = testBoard1.board
+          return
+      testBoard2.board[spot[0]][spot[1]] = L[1]
+      testBoard2.actSolve()
+      if not testBoard2.findError():
+          self.board = testBoard2.board
           return
           
-        
       
-      
-      
-    
 
 def main():
-  testBoard1 = Sudoku(testBoardMedium)
-  testBoard1.logicFill()
-  print(testBoard1)
-  testBoard2 = Sudoku(testBoardMedium)
-  testBoard2.actSolve()
-  print("final", testBoard2)
-  print(testBoard2.checkSolve())
-  print(testBoard2.findPlus())
+  board = Sudoku(testBoardHard)
+  print("unsolved:\n", board)
+  board.actSolve()
+  print("solved:\n", board)
 
 if __name__ == '__main__':
   main()
